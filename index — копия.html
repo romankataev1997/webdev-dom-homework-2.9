@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Проект "Комменты"</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <div class="container">
+        <ul id="list" class="comments">
+            <!-- Список рендерится из JS -->
+            <!-- <li class="comment">
+        <div class="comment-header">
+          <div>Глеб Фокин</div>
+          <div>12.02.22 12:18</div>
+        </div>
+        <div class="comment-body">
+          <div class="comment-text">
+            Это будет первый комментарий на этой странице
+          </div>
+        </div>
+        <div class="comment-footer">
+          <div class="likes">
+            <span class="likes-counter" data-counter="3">3</span>
+            <button class="like-button"data-like="3"></button>
+          </div>
+        </div>
+      </li>
+      <li class="comment">
+        <div class="comment-header">
+          <div>Варвара Н.</div>
+          <div>13.02.22 19:22</div>
+        </div>
+        <div class="comment-body">
+          <div class="comment-text">
+            Мне нравится как оформлена эта страница! ❤
+          </div>
+        </div>
+        <div class="comment-footer">
+          <div class="likes">
+            <span class="likes-counter" data-counter="75">75</span>
+            <button class="like-button -active-like" data-like="75"></button>
+          </div>
+        </div>
+      </li> -->
+        </ul>
+        <div class="add-form">
+            <input id="name-input" value="" type="text" class="add-form-name" placeholder="Введите ваше имя" />
+            <textarea id="comment-input" value="" type="textarea" class="add-form-text"
+                placeholder="Введите ваш коментарий" rows="4"></textarea>
+            <div class="add-form-row">
+                <button id="button" class="add-form-button">Написать</button>
+                <button id="button" class="add-form-button delete-form-button">Удалить комментарий</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    // Создаем функцию времени, не понимаю почему она не функционирует если вношу в скрипт ниже.
+    function formattedDataTime() {
+        let currentDate = new Date().toLocaleString();
+        let arr = currentDate.split('')
+        let newArr = []
+        for (i = 0; i < arr.length; i++) {
+            if ((i < 6 || i > 7) && i != 10) newArr.push(arr[i])
+        }
+        return String(newArr.slice(0, -3).join(''))
+    }
+</script>
+
+<script>
+    "use strict";
+    const commentsBox = document.querySelector(".comments");
+    const inputName = document.querySelector(".add-form-name");
+    const inputText = document.querySelector(".add-form-text");
+    const addButtonElement = document.querySelector(".add-form-button");
+    const deleteButtonElement = document.querySelector(".delete-form-button");
+
+    const likesElements = document.querySelectorAll(".like-button");
+
+    // создаем счетчики лайков
+    // Храним информацию о пользователях в массиве
+    const persons = [
+        {
+            name: 'Глеб Фокин',
+            comment: 'Это будет первый комментарий на этой странице',
+            date: '12.02.22 12:18',
+            likes: 3,
+            isLiked: false,
+        },
+        {
+            name: 'Варвара Н.',
+            comment: 'Мне нравится как оформлена эта страница! ❤',
+            date: '13.02.22 19:22',
+            likes: 74,
+            isLiked: false,
+        },
+    ];
+
+    // Создаем функцию лайка на каждом коментарии
+    const initLikeCommentListeners = () => {
+        const likesElements = document.querySelectorAll('.like-button');
+
+        for (const likesElement of likesElements) {
+
+            const index = likesElement.dataset.index;
+            let likesCounts = likesElement.dataset.likeCounts;
+
+            likesElement.addEventListener('click', (event) => {
+                if (!persons[index].isLiked) {
+                    likesCounts++;
+                    persons[index].likes = likesCounts;
+                    persons[index].isLiked = true;
+                } else {
+                    likesCounts--;
+                    persons[index].likes = likesCounts;
+                    persons[index].isLiked = false;
+                }
+
+                renderComments();
+            })
+        }
+    }
+
+
+    // Удаление последнего коментария посредством удаления последнего элемента из массива
+    const initDeleteLastComentListener = () => {
+        deleteButtonElement.addEventListener('click', () => {
+            persons.pop();
+
+            renderComments();
+        })
+    }
+
+
+    // Создаем рендер функцию, для отрисовки контента из JS
+    const renderComments = () => {
+        const commentsHtml = persons
+            .map((person, index) => {
+                return `<li class="comment">
+        <div class="comment-header">
+          <div>${person.name}</div>
+          <div>${person.date}</div>
+        </div>
+        <div class="comment-body">
+          <div class="comment-text">
+            ${person.comment}
+          </div>
+        </div>
+        <div class="comment-footer">
+          <div class="likes">
+            <span class="likes-counter">${person.likes}</span>
+            <button data-index="${index}" data-like-counts="${person.likes}" class="like-button ${persons[index].isLiked ? '-active-like' : ''}"></button>
+          </div>
+        </div>
+      </li>`;
+     })
+    .join('');
+
+    commentsBox.innerHTML = commentsHtml;
+
+    initLikeCommentListeners();
+    formattedDataTime();
+    }
+
+    renderComments();
+    initDeleteLastComentListener();
+
+     // Кнопка "Написать" будет недоступна прям в момент посещения сайта, так как поля пустые
+  // в дальнейшем кнопка разблокируется, если заполнить поля каким-либо текстом
+  addButtonElement.disabled = true;
+
+// Тут кнопка разблокируется, если в какой либо форме будет текст
+inputName.addEventListener("input", () => {
+  if (inputName.value.length > 0) {
+    return (addButtonElement.disabled = false);
+  } else {
+    return (addButtonElement.disabled = true);
+  }
+});
+
+inputText.addEventListener("input", () => {
+  if (inputText.value.length > 0) {
+    return (addButtonElement.disabled = false);
+  } else {
+    return (addButtonElement.disabled = true);
+  }
+});
+
+  // Валидация форм. Если какое либо поле будет пустым, placeholder окраситься в красный
+  // Если валидация пройдена, коментарий добавиться в ленту по нажатию мышкой на кнопку
+  // После того, как коментарий опубликуется, произойдет очистка полей
+  addButtonElement.addEventListener("click", () => {
+
+inputName.classList.remove("error");
+inputText.classList.remove("error");
+
+if (inputName.value.trim().length === 0 || inputText.value.trim().length === 0) {
+  inputName.classList.add("error");
+  inputText.classList.add("error");
+  return;
+}
+
+// Добавляем данные о пользователе в исходный массив с данными о пользователях
+persons.push({
+  name: inputName.value,
+  comment: inputText.value,
+  date: formattedDataTime(),
+  likes: 0,
+  isLiked: false,
+})
+
+// Проверяю, работает ли код
+console.log(persons);
+// Вызываем рендер функцию для отрисовки нового коментария
+renderComments();
+
+inputName.value = "";
+inputText.value = "";
+});
+  
+// То же самое, что и выше, только для добавления коментария по нажатию "Enter"
+inputText.addEventListener("keyup", (event) => {
+    if (event.key === "Enter") { // Проверяем, была ли нажата клавиша Enter
+
+      inputName.classList.remove("error");
+      inputText.classList.remove("error");
+
+      if (inputName.value.trim().length === 0 || inputText.value.trim().length === 0 || inputText.value === '\n') {
+        inputText.value = '';
+        inputName.classList.add("error");
+        inputText.classList.add("error");
+        return;
+      }
+
+
+      persons.push({
+        name: inputName.value,
+        comment: inputText.value,
+        date: formattedDataTime(),
+        likes: 0,
+        isLiked: false,
+      })
+
+      // Проверяю, работает ли код
+      console.log(persons);
+      // Вызываем рендер функцию для отрисовки нового коментария
+      renderComments();
+
+      inputName.value = "";
+      inputText.value = "";
+    }
+  });
+
+</script>
+
+</html>
