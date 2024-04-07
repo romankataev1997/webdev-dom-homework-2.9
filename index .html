@@ -135,19 +135,33 @@
         })
     }
 
+     // Ответ на комментарий
+    const initReplyToComment = () => {
+    const commentsBodyElements = document.querySelectorAll('.comment');
+    commentsBodyElements.forEach((comment, index) => {
+      comment.addEventListener('click', () => {
+        inputText.value = `QUOTE_BEGIN ${persons[index].name}: \n ${persons[index].comment} QUOTE_END \n`;
+      })
+    })
+  }
+
+  initReplyToComment();
+
 
     // Создаем рендер функцию, для отрисовки контента из JS
     const renderComments = () => {
         const commentsHtml = persons
-            .map((person, index) => {
-                return `<li class="comment">
+        .map((person, index) => {
+        return `<li class="comment">
         <div class="comment-header">
           <div>${person.name}</div>
           <div>${person.date}</div>
         </div>
         <div class="comment-body">
           <div class="comment-text">
-            ${person.comment}
+            ${person.comment
+            .replaceAll('QUOTE_BEGIN', '<div class="quote">')
+            .replaceAll('QUOTE_END', '</div>')}
           </div>
         </div>
         <div class="comment-footer">
@@ -162,6 +176,7 @@
 
     commentsBox.innerHTML = commentsHtml;
 
+    initReplyToComment();
     initLikeCommentListeners();
     formattedDataTime();
     }
@@ -206,8 +221,14 @@ if (inputName.value.trim().length === 0 || inputText.value.trim().length === 0) 
 
 // Добавляем данные о пользователе в исходный массив с данными о пользователях
 persons.push({
-  name: inputName.value,
-  comment: inputText.value,
+  name: inputName.value
+  .replaceAll('<','&lt')
+  .replaceAll('>','&gt')
+  .replaceAll('"','&quot'),
+  comment: inputText.value
+  .replaceAll('<','&lt')
+  .replaceAll('>','&gt')
+  .replaceAll('"','&quot'),
   date: formattedDataTime(),
   likes: 0,
   isLiked: false,
