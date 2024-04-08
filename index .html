@@ -110,7 +110,8 @@
             let likesCounts = likesElement.dataset.likeCounts;
 
             likesElement.addEventListener('click', (event) => {
-                if (!persons[index].isLiked) {
+              event.stopPropagation();
+              if (!persons[index].isLiked) {
                     likesCounts++;
                     persons[index].likes = likesCounts;
                     persons[index].isLiked = true;
